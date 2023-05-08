@@ -38,9 +38,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      # - uses: actions/checkout@v1
-      # - name: Update deployment file
-      #   run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|cr-hn-1.bizflycloud.vn/cecd854937c8421b81d1d73789acad52/techblog:'${TAG}'|' ${{github.workspace}}/config/deployment.yml
+      - uses: actions/checkout@v1
+      - name: Update deployment file
+        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|cr-hn-1.bizflycloud.vn/cecd854937c8421b81d1d73789acad52/techblog:'${TAG}'|' ${{github.workspace}}/config/deployment.yml
 
 
       - uses: actions-hub/kubectl@master
@@ -48,11 +48,11 @@ jobs:
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          args: get pods --all-namespaces
+          args: apply -f ${{github.workspace}}/config/deployment.yml
 
-      # - uses: actions-hub/kubectl@master
-      #   name: Deploy
-      #   env:
-      #     KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-      #   with:
-      #     args: rollout status deployment/python-example
+      - uses: actions-hub/kubectl@master
+        name: Deploy
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args: rollout status deployment/python-example
