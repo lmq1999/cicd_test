@@ -15,21 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - name: Set output
-        id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-      - name: Check output
-        env:
-          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-        run: |
-          echo $RELEASE_VERSION
-          echo ${{ steps.vars.outputs.tag }}
-      - uses: actions/checkout@v1
       - name: Publish to Registry
         uses: elgohr/Publish-Docker-Github-Action@v5
         with:
           registry: cr-hn-1.bizflycloud.vn
-          name: cr-hn-1.bizflycloud.vn/cecd854937c8421b81d1d73789acad52/techblog:${{ steps.vars.outputs.tag }}
+          name: cr-hn-1.bizflycloud.vn/cecd854937c8421b81d1d73789acad52/techblog:latest
           username: ${{ secrets.USER_CLOUD }}
           password: ${{ secrets.PASS }}
 
@@ -38,19 +28,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: digitalocean/action-doctl@v2
-      - name: Update deployment file
-        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|cr-hn-1.bizflycloud.vn/cecd854937c8421b81d1d73789acad52/techblog:'${TAG}'|' ${{github.workspace}}/config/deployment.yml
+      - uses: actions/checkout@v1
       - uses: actions-hub/kubectl@master
         name: Deploy
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          args: apply -f ${{github.workspace}}/config/deployment.yml
+          args: kubectl rollout restart deployment python-example
 
-      - uses: actions-hub/kubectl@master
-        name: Deploy
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-        with:
-          args: rollout status deployment/python-example
