@@ -42,14 +42,16 @@ jobs:
       - name: Update deployment file
         run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|${{ secrets.REGISTRY_NAME }}/python-example:'${TAG}'|' $GITHUB_WORKSPACE/config/deployment.yml
 
-      - uses: danielr1996/kubectl-action@1.0.0
+      - uses: actions-hub/kubectl@master
         name: Deploy
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}
           args: apply -f deployment.yaml
 
-      - uses: danielr1996/kubectl-action@1.0.0
-        name: Verify
+      - uses: actions-hub/kubectl@master
+        name: Deploy
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          kubeconfig: ${{ secrets.KUBE_CONFIG }}
           args: rollout status deployment/python-example
