@@ -8,10 +8,10 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         self.send_response(HTTPStatus.OK)
         self.end_headers()
-        msg = 'Hello there%s' % (self.path)
+        msg = 'Xin ch%s' % (self.path)
         self.wfile.write(msg.encode())
 
-port = int(os.getenv('PORT', 8081))
+port = int(os.getenv('PORT', 80))
 print('Listening on port %s' % (port))
 httpd = socketserver.TCPServer(('', port), Handler)
 httpd.serve_forever()
